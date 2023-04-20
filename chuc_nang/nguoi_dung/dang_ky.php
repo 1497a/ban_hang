@@ -2,6 +2,8 @@
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn = mysqli_connect("localhost", "root", "", "ban_hang");
 
+    $phone_regex = "/^0[0-9]{9,10}$/";
+
     $tai_khoan = $_POST['tai_khoan'];
     $mat_khau = $_POST['mat_khau'];
     $email = $_POST['email'];
@@ -19,83 +21,85 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (mysqli_num_rows($check_tai_khoan_result) > 0) {
         echo "Tên đăng nhập này đã có người dùng. Vui lòng chọn tên đăng nhập khác.";
-    }
-    else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo "Email này không hợp lệ. Vui long nhập email khác.";
-    }
-    else if (mysqli_num_rows($check_email_result) > 0) {
+    } else if (mysqli_num_rows($check_email_result) > 0) {
         echo "Email này đã có người dùng. Vui lòng chọn Email khác.";
-    }
-    else if (!filter_var($so_dien_thoai, FILTER_VALIDATE_INT)) {
+    } else if (!filter_var($so_dien_thoai, FILTER_VALIDATE_REGEXP, array("options" => array("regexp" => $phone_regex)))) {
         echo "Số điện thoại này không hợp lệ. Vui long nhập số điện thoại khác.";
-    }
-     else {
-        $query = "INSERT INTO nguoi_dung (tai_khoan, mat_khau, email, ho_ten, dia_chi, tinh_thanh, quan_huyen) VALUES ('$tai_khoan', '$mat_khau', '$email', '$ho_ten', '$dia_chi', '$tinh_thanh', '$quan_huyen')";
+    } else {
+        $query = "INSERT INTO nguoi_dung (tai_khoan, mat_khau, email, ho_ten,so_dien_thoai, dia_chi, tinh_thanh, quan_huyen) VALUES ('$tai_khoan', '$mat_khau', '$email', '$ho_ten', '$so_dien_thoai','$dia_chi', '$tinh_thanh', '$quan_huyen')";
         mysqli_query($conn, $query);
-        header('Location: ../../');
+        header('Location: dang_nhap.php');
     }
 }
 ?>
 <html>
+
 <head>
     <title>Đăng ký</title>
 </head>
 <style>
-    body {
+body {
     background-color: #f2f2f2;
-    }
-    form {
-        padding: 10px;
-    }
-    .container2 {
-        width: 500px;
-        margin: 0 auto;
-        background-color: white;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        padding: 20px;
-    }
+}
 
-    h1 {
-        text-align: center;
-    }
+form {
+    padding: 10px;
+}
 
-    input[type=text], input[type=password], select {
-        width: 100%;
-        padding: 12px 20px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
+.container2 {
+    width: 500px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+}
 
-    label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 5px;
-    }
+h1 {
+    text-align: center;
+}
 
-    button {
-        background-color: #00a5e5;
-        color:#fff;
-        padding: 14px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        width: 100%;
-    }
+input[type=text],
+input[type=password],
+select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
 
-    button:hover {
-        background-color: #0077b3;
-    }
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
 
-    .clearfix::after {
-        content: "";
-        clear: both;
-        display: table;
-    }
+button {
+    background-color: #00a5e5;
+    color: #fff;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #0077b3;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
 </style>
+
 <body>
     <form method="POST">
         <div class="container2">
@@ -121,44 +125,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="text" placeholder="Nhập địa chỉ" name="dia_chi" required>
             <br>
 
-            <select name="tinh_thanh" class="form-select form-select-sm mb-3" id="city" aria-label=".form-select-sm" required>
-                <option value="" selected>Chọn tỉnh thành</option>           
+            <select name="tinh_thanh" class="form-select form-select-sm mb-3" id="city" aria-label=".form-select-sm"
+                required>
+                <option value="" selected>Chọn tỉnh thành</option>
             </select>
-            <select name="quan_huyen" class="form-select form-select-sm mb-3" id="district" aria-label=".form-select-sm" required>
+            <select name="quan_huyen" class="form-select form-select-sm mb-3" id="district" aria-label=".form-select-sm"
+                required>
                 <option value="" selected>Chọn quận huyện</option>
             </select>
             <div class="clearfix">
-            <button type="submit" class="signupbtn">Đăng Ký</button>
-        </div>
-    </form> 
+                <button type="submit" class="signupbtn">Đăng Ký</button>
+            </div>
+    </form>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-<script>
-	var citis = document.getElementById("city");
+    <script>
+    var citis = document.getElementById("city");
     var districts = document.getElementById("district");
     var Parameter = {
-        url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json", 
-        method: "GET", 
-        responseType: "application/json", 
+        url: "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json",
+        method: "GET",
+        responseType: "application/json",
     };
     var promise = axios(Parameter);
-    promise.then(function (result) {
+    promise.then(function(result) {
         renderCity(result.data);
     });
 
-function renderCity(data) {
-    for (const x of data)
-        citis.options[citis.options.length] = new Option(x.Name, x.Name);
-    citis.onchange = function () {
-        district.length = 1;
-        if(this.value != "") {
-            const result = data.filter(n => n.Name === this.value);
-            for (const k of result[0].Districts)
-                districts.options[districts.options.length] = new Option(k.Name, k.Name);
-        }
-    };
-}
-</script>
+    function renderCity(data) {
+        for (const x of data)
+            citis.options[citis.options.length] = new Option(x.Name, x.Name);
+        citis.onchange = function() {
+            district.length = 1;
+            if (this.value != "") {
+                const result = data.filter(n => n.Name === this.value);
+                for (const k of result[0].Districts)
+                    districts.options[districts.options.length] = new Option(k.Name, k.Name);
+            }
+        };
+    }
+    </script>
 
 </body>
-
